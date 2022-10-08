@@ -4,11 +4,12 @@
 "description":"APÍ Rest inventarios",
 "main":"index.js",
 
-"scripts":{"test":"echo\"Error: no test specified\" &&exit 1",
+"scripts":{"test":"echo\"Error: no test specified\" &&exit 1", 
+  "dev":"nodemon index.js",
 "start": "node index.js"
 },
 
-"author": "LeidyOcampo-YerlkyOrtiz-Estefania",
+"author": "LeidyOcampo-YerlyOrtiz-Estefania",
 "license": "ISC",
 "dependencies": {
     "cors": "^2.8.5",

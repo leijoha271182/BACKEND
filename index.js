@@ -10,7 +10,7 @@ app.use(cors()); // implementacion de cors -> este sirve para que el frontend pu
 
 getConnection();
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 4000);
 app.use(express.json()); // Parseo Json
 
 app.use('/usuario', require('./router/usuario'));
