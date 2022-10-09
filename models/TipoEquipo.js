@@ -10,10 +10,6 @@ const tipoEquipoSchema = Schema({
     estado: {
         type: String,
         required: true,
-        enum: [
-            'Activo',
-            'Inactivo'
-        ]
     },
     fechaCreacion: {
         type: Date,

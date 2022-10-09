@@ -8,21 +8,37 @@ router.post('/', async function(req, res){
     
     try {
 
-        const validar = validarTipoEquipo(req);
+        let newTipoEquipo = TipoEquipo({
+            nombre: req.body.nombre,
+            estado: req.body.estado,
+            fechaCreacion: new Date(),
+            fechaActualizacion: new Date()
+        })
+
+        newTipoEquipo.save()
+        res.status(200).json({
+            code: 'tipo equipo creado',
+            tipoEquipo: newTipoEquipo
+        })
+
         
-        if (validar.length > 0) {
-            return res.status(400).send(validar);
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Ocurrio un error');
+    }
+
+});
+
+router.get('/:tipoEquipoId', async function(req, res){
+    
+    try {
+        
+        let tipoEquipos = await TipoEquipo.findOne({_id:req.params.tipoEquipoId});
+        if(tipoEquipos){
+            res.status(200).json({code: 'tipo de equipo', tipoEquipo:tipoEquipos})
         }
-
-        let tipoEquipo = new TipoEquipo();
-        tipoEquipo.nombre = req.body.nombre;
-        tipoEquipo.estado = req.body.estado;
-        tipoEquipo.fechaCreacion = new Date();
-        tipoEquipo.fechaActualizacion = new Date();
-
-        tipoEquipo = await tipoEquipo.save();
-        res.send(tipoEquipo);
         
+
     } catch (error) {
         console.log(error)
         res.status(500).send('Ocurrio un error');
@@ -44,24 +60,22 @@ router.get('/', async function(req, res){
 
 });
 
-router.put('/:tipoEquipoId', async function(req, res){
+router.patch('/:tipoEquipoId', async function(req, res){
    
     try {
-        let tipoEquipo = await TipoEquipo.findById(req.params.tipoEquipoId);
-        
-        if (!tipoEquipo) {
-            return res.status(400).send('Tipo de Equipo no existe');
+
+        let tipoEquipo = await TipoEquipo.findById(req.params.tipoEquipoId)
+        if(!tipoEquipo){
+            return res.status(401).json({code:'Tipo de Equipo no existe'});
+        }else{
+            await TipoEquipo.findByIdAndUpdate(req.params.tipoEquipoId, {
+                nombre: req.body.nombre,
+                estado: req.body.estado,
+                fechaActualizacion: new Date()
+            })
+
+            res.status(200).json({code: 'tipo de equipo actualizado'})
         }
-
-        tipoEquipo.nombre = req.body.nombre;
-        tipoEquipo.estado = req.body.estado;
-        tipoEquipo.fechaActualizacion = new Date();
-
-    
-        tipoEquipo = await tipoEquipo.save(); // lo guarda en la base de datos
-    
-        res.send(tipoEquipo);
-
         
     } catch (error) {
         console.log(error)
@@ -69,5 +83,13 @@ router.put('/:tipoEquipoId', async function(req, res){
     }
 
 });
+
+router.delete('/:tipoEquipoId/delete', async(req, res) => {
+    let tipoEquipo = await TipoEquipo.findOne({_id: req.params.tipoEquipoId})
+    if(tipoEquipo){
+        await TipoEquipo.findByIdAndRemove(req.params.tipoEquipoId)
+        res.status(200).json({code: 'Tipo equipo eliminado'})
+    }
+})
 
 module.exports = router

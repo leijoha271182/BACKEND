@@ -9,11 +9,7 @@ const marcaSchema = Schema({
     
     estado: {
         type: String,
-        required: true,
-        enum: [
-            'Activo',
-            'Inactivo'
-        ]
+        required: true
     },
     fechaCreacion: {
         type: Date,

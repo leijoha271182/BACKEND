@@ -8,17 +8,13 @@ const router = Router();
 router.post('/create', async function (req, res) {
 
     try {
-
         const validar = validarUsuario(req);
-
         if (validar.length > 0) {
             return res.status(400).json({
                 codigo: "letra mínima 0",
                 resp: validar
             });
-
         }
-
         const existeUsuario = await Usuario.findOne({ email: req.body.email })
 
         if (existeUsuario) {
@@ -28,20 +24,20 @@ router.post('/create', async function (req, res) {
             });
         }
 
-        let usuario = new Usuario();
-        usuario.nombre = req.body.nombre;
-        usuario.email = req.body.email;
-        usuario.estado = req.body.estado;
-        usuario.fechaCreacion = new Date();
-        usuario.fechaActualizacion = new Date();
+        let newUsuario = new Usuario({
+            nombre: req.body.nombre,
+            email: req.body.email,
+            estado: req.body.estado,
+            fechaCreacion: new Date(),
+            fechaActualizacion: new Date(),
+        })
 
-
-        usuario = await usuario.save(); // lo guarda en la base de datos
+        await newUsuario.save() //Guardando usuario en Base de Datos
 
         res.status(200).json({
             codigo: "Usuario guardado",
             resp: "El usuario ha sido creado satisfactoriamente",
-            usuario: usuario
+            usuario: newUsuario
         }); // para mostrarlo como respuesta 
 
     } catch (error) {
@@ -53,46 +49,63 @@ router.post('/create', async function (req, res) {
 });
 
 
-router.get('/', async function (req, res) {
+router.get('/userlist', async function (req, res) {
+    // console.log('get users')
+    const usuarios = await Usuario.find()
+        .then(users => {
+            if(users){
+                res.status(200).json({code:'find user', usuarios:users})
+            }else{
+                res.status(401).json({code:'no find user'});
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })
+});
+
+router.get('/:usuarioId', async function (req, res) {
     try {
 
-        const usuarios = await Usuario.find();
-        res.send(usuarios);
+        const usuario = await Usuario.findById(req.params.usuarioId);
+        if(usuario){
+            return res.status(200).json({
+                code: 'Usuario encontrado',
+                usuario: usuario
+            })
+        }
+        // res.send(usuarios);
 
     } catch (error) {
         console.log(error)
-        res.status(500).send('Ocurrio un error');
+        res.status(500).json({code:'Ocurrio un error'});
     }
 });
 
 
 
-router.put('/:usuarioId/put', async function (req, res) {
+router.patch('/:usuarioId/put', async function (req, res) {
     try {
 
         let usuario = await Usuario.findById(req.params.usuarioId); // se obtiene el usuario por medio del id
 
         if (!usuario) {
             return res.status(401).send('El Ususario no existe');
+        }else{
+            //console.log(req.body)
+            await Usuario.findByIdAndUpdate(req.params.usuarioId, {
+                nombre: req.body.nombre,
+                email: req.body.email,
+                estado: req.body.estado,
+                fechaActualizacion: new Date()
+            })
+                .then(
+                    res.status(200).json({code: 'usuario actualizado'})
+                )
+                .catch(err => console.log(err))
         }
 
-        let usuarioEmail = await Usuario.findOne({ email: req.body.email, _id: { $ne: usuario._id } });
-        //$ne = no equals no igual 
-        // busca en la tabla si exite el email y verifica que otro id diferente al que estoy buscando tenga este email, ya que si modifico el email y ya existe no me lo va a dejar actualizar
-        if (usuarioEmail) {
-            return res.status(401).send('El Email ya existe');
-        }
-
-        let nuevoUsuario = new Usuario({
-            nombre: req.body.nombre,
-            email: req.body.email,
-            estado: req.body.estado,
-            fechaActualizacion: new Date()
-        })
-        nuevoUsuario.save()
         //usuario = await usuario.save(); // lo guarda en la base de datos
-
-        res.send(usuario); // para mostrarlo como respuesta 
 
     } catch (error) {
         console.log(error);

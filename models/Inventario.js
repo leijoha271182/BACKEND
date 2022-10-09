@@ -71,6 +71,10 @@ const inventarioSchema = Schema({
     fechaActualizacion: {
         type: Date,
         required: true
+    },
+    estado: {
+        type: String,
+        default: 'Activo'
     }
 
 });
